@@ -69,6 +69,27 @@ def sort_method(node, settings=None):
                     reverse=reverse)
 
 
+class Sorter(object):
+    def __init__(self, site):
+        for name, settings in site.config.sorter.__dict__.items():
+            method = partial(
+                sort_method,
+                settings=settings)
+
+            setattr(self, name, method)
+
+            prev_att = 'prev_by_%s' % name
+            next_att = 'next_by_%s' % name
+
+            setattr(Resource, prev_att, None)
+            setattr(Resource, next_att, None)
+
+            walker = method(site.content)
+            for prev, next in pairwalk(walker):
+                setattr(prev, next_att, next)
+                setattr(next, prev_att, prev)
+
+
 class SorterPlugin(Plugin):
     """
     Sorter plugin for hyde. Adds the ability to do
@@ -109,23 +130,4 @@ class SorterPlugin(Plugin):
         if not hasattr(config, 'sorter'):
             return
 
-        for name, settings in config.sorter.__dict__.items():
-            sort_method_name = 'walk_resources_sorted_by_%s' % name
-            self.logger.debug("Adding sort methods for [%s]" % name)
-            add_method(Node, sort_method_name, sort_method, settings=settings)
-            match_method_name = 'is_%s' % name
-            add_method(Resource, match_method_name, filter_method, settings)
-
-            prev_att = 'prev_by_%s' % name
-            next_att = 'next_by_%s' % name
-
-            setattr(Resource, prev_att, None)
-            setattr(Resource, next_att, None)
-
-            walker = getattr(self.site.content,
-                                sort_method_name,
-                                self.site.content.walk_resources)
-            for prev, next in pairwalk(walker()):
-                setattr(prev, next_att, next)
-                setattr(next, prev_att, prev)
-
+        self.site.sorter = Sorter(self.site)

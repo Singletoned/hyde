@@ -35,7 +35,7 @@ class TestSorter(object):
 
         SorterPlugin(s).begin_site()
 
-        assert hasattr(s.content, 'walk_resources_sorted_by_kind')
+        assert not hasattr(s.content, 'walk_resources_sorted_by_kind')
         expected = ["404.html",
                     "about.html",
                     "apple-touch-icon.png",
@@ -47,7 +47,7 @@ class TestSorter(object):
                     ]
 
         pages = [page.name for page in
-                s.content.walk_resources_sorted_by_kind()]
+                s.sorter.kind(s.content)]
 
         assert pages == sorted(expected, key=lambda f: (File(f).kind, f))
 
@@ -59,7 +59,7 @@ class TestSorter(object):
 
         SorterPlugin(s).begin_site()
 
-        assert hasattr(s.content, 'walk_resources_sorted_by_kind')
+        assert not hasattr(s.content, 'walk_resources_sorted_by_kind')
         expected = ["404.html",
                     "about.html",
                     "apple-touch-icon.png",
@@ -71,8 +71,7 @@ class TestSorter(object):
                     ]
 
         pages = [page.name for page in
-                s.content.walk_resources_sorted_by_kind()]
-
+                 s.sorter.kind(s.content)]
 
         assert pages == sorted(expected, key=lambda f: (File(f).kind, f), reverse=True)
 
@@ -90,13 +89,13 @@ class TestSorter(object):
         s.load()
         SorterPlugin(s).begin_site()
 
-        assert hasattr(s.content, 'walk_resources_sorted_by_kind2')
+        assert not hasattr(s.content, 'walk_resources_sorted_by_kind2')
         expected = ["404.html",
                     "about.html",
                     "merry-christmas.html"
                     ]
 
-        pages = [page.name for page in s.content.walk_resources_sorted_by_kind2()]
+        pages = [page.name for page in s.sorter.kind2(s.content)]
 
         assert pages == sorted(expected)
 
@@ -117,7 +116,7 @@ class TestSorter(object):
         s.load()
         SorterPlugin(s).begin_site()
 
-        assert hasattr(s.content, 'walk_resources_sorted_by_multi')
+        assert not hasattr(s.content, 'walk_resources_sorted_by_multi')
         expected = ["content/404.html",
                     "content/about.html",
                     "content/apple-touch-icon.png",
@@ -128,7 +127,7 @@ class TestSorter(object):
                     "content/site.css"
                     ]
 
-        pages = [page.name for page in s.content.walk_resources_sorted_by_multi()]
+        pages = [page.name for page in s.sorter.multi(s.content)]
 
         expected_sorted = [File(page).name
                                 for page in
@@ -156,10 +155,10 @@ class TestSorter(object):
         p_404.is_processable = False
         SorterPlugin(s).begin_site()
 
-        assert hasattr(s.content, 'walk_resources_sorted_by_kind2')
+        assert not hasattr(s.content, 'walk_resources_sorted_by_kind2')
         expected = ["404.html", "about.html", "merry-christmas.html"]
 
-        pages = [page.name for page in s.content.walk_resources_sorted_by_kind2()]
+        pages = [page.name for page in s.sorter.kind2(s.content)]
 
         assert pages == sorted(expected)
 
@@ -260,7 +259,7 @@ class TestSorter(object):
    {% extends "base.html" %}
 
    {% block main %}
-       {% set latest = site.content.walk_resources_sorted_by_time()|reverse|first %}
+       {% set latest = site.sorter.time(site.content)|reverse|first %}
        <span class="latest">{{ latest.meta.title }}</span>
    {% endblock %}
    """
@@ -319,12 +318,12 @@ class TestSorterMeta(object):
        MetaPlugin(s).begin_site()
        SorterPlugin(s).begin_site()
 
-       assert hasattr(s.content, 'walk_resources_sorted_by_index')
+       assert not hasattr(s.content, 'walk_resources_sorted_by_index')
        expected = ["angry-post.html",
                    "another-sad-post.html",
                    "happy-post.html"]
 
        pages = [page.name for page in
-               s.content.walk_resources_sorted_by_index()]
+                s.sorter.index(s.content)]
 
        assert pages == sorted(expected, key=lambda f: (File(f).kind, f))

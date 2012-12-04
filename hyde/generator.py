@@ -66,7 +66,7 @@ class Generator(object):
     def load_template_if_needed(self):
         """
         Loads and configures the template environement from the site
-        configuration if its not done already.
+        configuration if it's not done already.
         """
 
         class GeneratorProxy(object):

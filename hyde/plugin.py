@@ -71,6 +71,14 @@ class Plugin(object):
         self.template = None
 
 
+        opts = Expando({})
+        try:
+            opts = getattr(self.site.config, self.plugin_name)
+        except AttributeError:
+            pass
+        self.settings = opts
+
+
     def template_loaded(self, template):
         """
         Called when the template for the site has been identified.
@@ -108,20 +116,6 @@ class Plugin(object):
                 result = always_true
 
         return  result if result else super(Plugin, self).__getattribute__(name)
-
-    @property
-    def settings(self):
-        """
-        The settings for this plugin the site config.
-        """
-
-        opts = Expando({})
-        try:
-            opts = getattr(self.site.config, self.plugin_name)
-        except AttributeError:
-            pass
-        return opts
-
 
     @property
     def plugin_name(self):
